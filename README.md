@@ -287,4 +287,5 @@ For technical support or questions:
 
 **Version**: 2.0.0  
 **Last Updated**: August 2025  
-**Maintainer**: LandCover Analysis Team 
+
+**Maintainer**: Umar Azam Qureshi
