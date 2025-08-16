@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  landcover-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./static:/app/static
+    environment:
+      - DATA_FOLDER=/app/data/rasters
+      - OUTPUT_DIR=/app/output
+      - MODEL_DIR=/app/models
+      - LOGS_DIR=/app/logs
+      - QUICK_MODE=true
+      - QUICK_WINDOW_SIZE=600
+      - FUTURE_YEARS=5
+      - CONFIDENCE_THRESHOLD=0.55
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a database service if needed
+  # postgres:
+  #   image: postgres:13
+  #   environment:
+  #     POSTGRES_DB: landcover
+  #     POSTGRES_USER: user
+  #     POSTGRES_PASSWORD: password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+volumes:
+  postgres_data: 

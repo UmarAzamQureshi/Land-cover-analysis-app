@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Land Cover Change Detection - Upload Raster Files</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .back-btn i {
+            margin-right: 8px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            padding: 40px;
+        }
+
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 10px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: #e3f2fd;
+        }
+
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: #e8f5e8;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #7f8c8d;
+            font-size: 1em;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 30px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .file-item.success {
+            border-left-color: #27ae60;
+            background: #e8f5e8;
+        }
+
+        .file-item.error {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .file-icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .file-status {
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .file-status.success {
+            color: #27ae60;
+        }
+
+        .file-status.error {
+            color: #e74c3c;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .upload-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .nav-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 0 10px;
+            background: #34495e;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #2c3e50;
+            transform: translateY(-1px);
+        }
+
+        .requirements {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .requirements h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .requirements ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .requirements li {
+            padding: 8px 0;
+            color: #7f8c8d;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .requirements li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .upload-section {
+                padding: 20px;
+            }
+            
+            .upload-area {
+                padding: 40px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 Land Cover Change Detection</h1>
+            <p>Upload your NDBI raster files for analysis</p>
+            
+            <!-- Back to Dashboard Button -->
+            <div style="margin-top: 20px;">
+                <a href="/dashboard" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drag & Drop your raster files here</div>
+                <div class="upload-subtext">or click to browse files</div>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".tif,.tiff">
+            </div>
+
+            <div class="requirements">
+                <h3>📋 File Requirements:</h3>
+                <ul>
+                    <li>Files must be in GeoTIFF format (.tif or .tiff)</li>
+                    <li>Filename should contain the year (e.g., "ndbi_2015.tif")</li>
+                    <li>Files should represent NDBI (Normalized Difference Built-up Index) data</li>
+                    <li>All files should cover the same geographic area</li>
+                    <li>Recommended: 5+ years of data for better analysis</li>
+                </ul>
+            </div>
+
+            <button class="upload-btn" id="uploadBtn" disabled>Upload Files</button>
+
+            <div class="file-list" id="fileList"></div>
+            <div class="status-message" id="statusMessage" style="display: none;"></div>
+
+            <div class="nav-tabs">
+                <a href="/dashboard" class="nav-tab">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="/upload" class="nav-tab active">
+                    <i class="fas fa-upload"></i> Upload Files
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileList = document.getElementById('fileList');
+        const statusMessage = document.getElementById('statusMessage');
+
+        let selectedFiles = [];
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            const validFiles = files.filter(file => {
+                const isValidType = file.name.toLowerCase().endsWith('.tif') || 
+                                  file.name.toLowerCase().endsWith('.tiff');
+                const hasYear = /\d{4}/.test(file.name);
+                
+                if (!isValidType) {
+                    showStatus(`❌ ${file.name} is not a valid TIFF file`, 'error');
+                    return false;
+                }
+                
+                if (!hasYear) {
+                    showStatus(`⚠️ ${file.name} doesn't contain a year in filename`, 'info');
+                }
+                
+                return isValidType;
+            });
+
+            selectedFiles = validFiles;
+            displayFileList();
+            uploadBtn.disabled = selectedFiles.length === 0;
+        }
+
+        function displayFileList() {
+            fileList.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const year = file.name.match(/\d{4}/);
+                const yearText = year ? ` (${year[0]})` : '';
+                
+                fileItem.innerHTML = `
+                    <div class="file-icon">🗺️</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}${yearText}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <div class="file-status">Ready to upload</div>
+                `;
+                
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        uploadBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showStatus(`✅ Successfully uploaded ${result.total_files} files!`, 'success');
+                    
+                    // Update file list with success status
+                    const fileItems = fileList.querySelectorAll('.file-item');
+                    fileItems.forEach(item => {
+                        item.classList.add('success');
+                        const status = item.querySelector('.file-status');
+                        status.textContent = 'Uploaded successfully';
+                        status.classList.add('success');
+                    });
+
+                    // Clear selection after successful upload
+                    setTimeout(() => {
+                        selectedFiles = [];
+                        displayFileList();
+                        uploadBtn.disabled = true;
+                        uploadBtn.textContent = 'Upload Files';
+                    }, 2000);
+
+                } else {
+                    showStatus(`❌ Upload failed: ${result.detail}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                showStatus('❌ Upload failed: Network error', 'error');
+            }
+
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Upload Files';
+        });
+
+        // Check API health on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    console.log('API is healthy');
+                } else {
+                    showStatus('⚠️ API connection issue', 'info');
+                }
+            } catch (error) {
+                showStatus('⚠️ Cannot connect to API', 'info');
+            }
+        });
+    </script>
+</body>
+</html>
